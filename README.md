@@ -2,6 +2,10 @@
 
 API REST para la gestión de usuarios, mascotas y adopciones. Desarrollada con Node.js, Express y MongoDB.
 
+## Repositorio
+
+[GitHub - AdoptMe Backend](https://github.com/josegrt1/adoptme-final)
+
 ## Tecnologías utilizadas
 
 * Node.js
@@ -13,14 +17,20 @@ API REST para la gestión de usuarios, mascotas y adopciones. Desarrollada con N
 
 ## Instalación local
 
-1. Clonar o descargar el proyecto.
-2. Instalar las dependencias:
+1. Clonar el repositorio.
+
+```bash
+git clone https://github.com/josegrt1/adoptme-final.git
+cd adoptme-final
+```
+
+2. Instalar dependencias.
 
 ```bash
 npm install
 ```
 
-3. Crear un archivo `.env` en la raíz del proyecto con las siguientes variables:
+3. Crear un archivo `.env` en la raíz del proyecto.
 
 ```env
 MONGO_URL=<cadena_de_conexion_de_mongodb_atlas>
@@ -28,17 +38,15 @@ MONGO_URL_TEST=<cadena_de_conexion_para_pruebas>
 PORT=8080
 ```
 
-4. Iniciar la aplicación:
+4. Iniciar la aplicación.
 
 ```bash
 npm start
 ```
 
-La documentación Swagger estará disponible en:
+La documentación Swagger local estará disponible en:
 
-```text
 http://localhost:8080/apidocs
-```
 
 ## Scripts disponibles
 
@@ -58,7 +66,7 @@ Inicia el servidor en modo desarrollo.
 npm test
 ```
 
-Ejecuta los tests funcionales del router de adopciones.
+Ejecuta las pruebas unitarias y de integración.
 
 ## Endpoints de adopciones
 
@@ -68,30 +76,64 @@ Ejecuta los tests funcionales del router de adopciones.
 | GET    | `/api/adoptions/:aid`      | Obtiene una adopción por su identificador.          |
 | POST   | `/api/adoptions/:uid/:pid` | Registra la adopción de una mascota por un usuario. |
 
-## Tests funcionales
+## Tests
 
-Los tests cubren los casos exitosos y de error del router `adoption.router.js`, incluyendo:
+El proyecto incluye:
 
-* Obtener adopciones.
-* Obtener una adopción existente o inexistente.
-* Intentar adoptar con un usuario inexistente.
-* Intentar adoptar una mascota inexistente.
-* Evitar adoptar una mascota que ya fue adoptada.
-* Crear una adopción correctamente.
+* Pruebas unitarias para `UserRepository` mediante un DAO simulado.
+* Pruebas de integración para el DAO de usuarios usando `MONGO_URL_TEST`.
+* Pruebas funcionales para todos los endpoints de `adoption.router.js`.
 
-Para ejecutarlos:
+Las pruebas funcionales validan:
+
+* Obtención de todas las adopciones.
+* Obtención de una adopción existente.
+* Respuesta 404 para una adopción inexistente.
+* Respuesta 404 para un usuario inexistente.
+* Respuesta 404 para una mascota inexistente.
+* Respuesta 400 al intentar adoptar una mascota ya adoptada.
+* Creación correcta de una adopción.
+
+Para ejecutarlas:
 
 ```bash
 npm test
 ```
 
+Resultado de la última ejecución:
+
+```text
+UserRepository
+  3 passing
+
+User DAO
+  4 passing
+
+Functional tests: adoption.router.js
+  7 passing
+
+14 passing
+```
+
 ## Docker
 
-La imagen pública del proyecto se encuentra en Docker Hub:
+La imagen pública se encuentra disponible en Docker Hub:
 
 [josegrt/adoptme-backend](https://hub.docker.com/r/josegrt/adoptme-backend)
 
-### Descargar la imagen
+Imagen y tag:
+
+```text
+josegrt/adoptme-backend:1.0
+```
+
+### Construir la imagen localmente
+
+```bash
+docker build -t adoptme-backend:1.0 .
+```
+
+### Descargar la imagen publicada
 
 ```bash
 docker pull josegrt/adoptme-backend:1.0
@@ -99,20 +141,33 @@ docker pull josegrt/adoptme-backend:1.0
 
 ### Ejecutar el contenedor
 
-Crear previamente el archivo `.env` con la variable `MONGO_URL` y ejecutar:
+Crear previamente un archivo `.env` con al menos la variable `MONGO_URL`.
 
 ```bash
 docker run -p 8080:8080 --env-file .env josegrt/adoptme-backend:1.0
 ```
 
-La aplicación quedará disponible en:
+Salida esperada:
 
 ```text
-http://localhost:8080/apidocs
+MongoDB conectada correctamente
+Listening on 8080
 ```
 
-## Deploy
+La aplicación quedará disponible en:
 
-La documentación pública de la aplicación se encuentra disponible en:
+http://localhost:8080/apidocs
+
+### Análisis básico de seguridad
+
+```bash
+docker scout quickview josegrt/adoptme-backend:1.0
+```
+
+Se realizó un análisis básico con Docker Scout. La imagen usa un usuario no privilegiado y una imagen base actualizada. Como parte de una mejora futura para producción, se deben revisar las vulnerabilidades reportadas por dependencias de la imagen base.
+
+## Deploy público
+
+La aplicación fue desplegada en Render.
 
 [Swagger - AdoptMe](https://adoptme-final.onrender.com/apidocs)
