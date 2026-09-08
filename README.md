@@ -164,7 +164,7 @@ http://localhost:8080/apidocs
 docker scout quickview josegrt/adoptme-backend:1.0
 ```
 
-Se realizó un análisis básico con Docker Scout. La imagen usa un usuario no privilegiado y una imagen base actualizada. Como parte de una mejora futura para producción, se deben revisar las vulnerabilidades reportadas por dependencias de la imagen base.
+Se realizó un análisis básico con Docker Scout.
 
 ## Deploy público
 
