@@ -1,83 +1,78 @@
-//npm install -D mocha
+import "dotenv/config";
 import mongoose from "mongoose";
-import assert  from "assert";
-//Modulo nativo de Node JS que nos permite hacer las validaciones
-import User from "../src/dao/Users.dao.js"; 
+import assert from "node:assert";
+import User from "../src/dao/Users.dao.js";
 
+describe("User DAO", function () {
+  this.timeout(10000);
 
-//Me conecto aca a la base de datos: 
- mongoose.connect(`mongodb+srv://coderhouse70410:coderhouse@cluster0.34nyl.mongodb.net/Backend3FinalAltaClase?retryWrites=true&w=majority&appName=Cluster0`)
+  let userDao;
 
-//describe: es una función que me permite agrupar un conjunto de pruebas relacionadas bajo un mismo bloque descriptivo. 
+  before(async function () {
+    const mongoUrl = process.env.MONGO_URL_TEST;
 
- describe("Testeamos el DAO de usuarios", function() {
+    if (!mongoUrl) {
+      throw new Error("Falta configurar MONGO_URL_TEST");
+    }
 
-    before(function() {
-        this.userDao = new User()
-    })
+    await mongoose.connect(mongoUrl);
+    userDao = new User();
+  });
 
-    //Limpiamos la base de datos cada vez que testeamos
-    beforeEach(async function() {
-        await mongoose.connection.collections.users.drop(); 
-        this.timeout(5000); 
-    })
+  beforeEach(async function () {
+    await mongoose.connection.collection("users").deleteMany({});
+  });
 
+  it("debe devolver un array al obtener usuarios", async function () {
+    const result = await userDao.get();
 
-    //Pruebas: 
-    it("El get de usuarios me retorna un array", async function () {
-        const resultado = await this.userDao.get(); 
-         assert.strictEqual(Array.isArray(resultado), true); 
-    })
-    
-    //test 1: 
+    assert.strictEqual(Array.isArray(result), true);
+  });
 
-    it("El Dao debe agregar correctamente un elemento a la base de datos.", async function (){
-        let usuario = {
-            first_name: "Goldie", 
-            last_name: "Legrand", 
-            email: "goldi@legrand.com", 
-            password: "1234"
-        }
+  it("debe guardar un usuario con identificador", async function () {
+    const user = {
+      first_name: "Goldie",
+      last_name: "Legrand",
+      email: "goldie.legrand@test.com",
+      password: "1234"
+    };
 
-        const resultado = await this.userDao.save(usuario)
-        assert.ok(resultado._id); 
+    const result = await userDao.save(user);
 
-    })
+    assert.ok(result._id);
+  });
 
-    //test 2: 
+  it("debe crear un usuario con mascotas vacías por defecto", async function () {
+    const user = {
+      first_name: "Goldie",
+      last_name: "Legrand",
+      email: "goldie.legrand@test.com",
+      password: "1234"
+    };
 
-    it("Al agregar un nuevo usuario, éste debe crearse con un arreglo de mascotas vacío por defecto.", async function () {
-         let usuario = {
-            first_name: "Goldie", 
-            last_name: "Legrand", 
-            email: "goldi@legrand.com", 
-            password: "1234"
-        }
+    const result = await userDao.save(user);
 
-        const resutado = await this.userDao.save(usuario); 
-        assert.deepStrictEqual(resutado.pets, []); 
-    })
+    assert.deepStrictEqual(result.pets, []);
+  });
 
-    //test 3: 
+  it("debe obtener un usuario por email", async function () {
+    const user = {
+      first_name: "Goldie",
+      last_name: "Legrand",
+      email: "goldie.legrand@test.com",
+      password: "1234"
+    };
 
-    it("El Dao puede obtener  a un usuario por email", async function () {
-         let usuario = {
-            first_name: "Goldie", 
-            last_name: "Legrand", 
-            email: "goldi@legrand.com", 
-            password: "1234"
-        }
+    await userDao.save(user);
 
-       await this.userDao.save(usuario); 
+    const result = await userDao.getBy({ email: user.email });
 
-       const user = await this.userDao.getBy({email: usuario.email}); 
-       assert.strictEqual(typeof user, "object"); 
-    })
+    assert.ok(result);
+    assert.strictEqual(result.email, user.email);
+  });
 
-    after(async function () {
-        await mongoose.disconnect(); 
-    })
-
-    
-
- })
+  after(async function () {
+    await mongoose.connection.collection("users").deleteMany({});
+    await mongoose.disconnect();
+  });
+});
