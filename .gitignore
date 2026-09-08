@@ -1,0 +1,5 @@
+node_modules
+.env
+
+apuntes.txt
+usuarios.json
